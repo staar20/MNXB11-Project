@@ -5,7 +5,16 @@
 
 # Changelog (entries from newest to oldest): 
 
-2026-10-27 Estrella González Gómez
+2026-10-28 Estrella González Gómez <es2670go-s@student.lu.se>
+
+    Improved the visualization of Analysis 3
+
+    * Redesigned the daily temperature plot to distinguish the mean temperature from its standard deviation.
+    * Replaced the individual error bars with a transparent shaded band representing the mean temperature plus and minus one standard deviation.
+    * Highlighted the mean temperature with a red line and adjusted the plot opacity and x-axis range to improve readability.
+    * Preserved the existing statistical calculations and the 365-day calendar.
+
+2026-10-27 Estrella González Gómez <es2670go-s@student.lu.se>
 
     Implemented and validated Analysis 3: daily temperature statistics
 

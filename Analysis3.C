@@ -9,9 +9,10 @@
 
 #include "include/Observation.h"
 
-#include <TGraphErrors.h>
 #include <TCanvas.h>
 #include <TAxis.h>
+#include <TGraph.h>
+#include <TGraphAsymmErrors.h>
 
 void Analysis3() {
 
@@ -153,9 +154,10 @@ void Analysis3() {
     inputFile->Close();
 
     std::cout << "\nSaved results to Analysis3.root" << std::endl;
-
-        // Create the temperature graph.
-    TGraphErrors *graph = new TGraphErrors();
+   
+    // Create separate graphs for the mean and standard deviation.
+    TGraphAsymmErrors *errorGraph = new TGraphAsymmErrors();
+    TGraph *meanGraph = new TGraph();
 
     for (int day = 1; day <= 365; ++day) {
         int n = numberOfDates[day];
@@ -171,29 +173,57 @@ void Analysis3() {
 
         double standardDeviation = std::sqrt(variance);
 
-        int point = graph->GetN();
+        int point = meanGraph->GetN();
 
-        graph->SetPoint(point, day, mean);
-        graph->SetPointError(point, 0.0, standardDeviation);
+        // Mean temperature.
+        meanGraph->SetPoint(point, day, mean);
+
+        // Mean +/- one standard deviation.
+        errorGraph->SetPoint(point, day, mean);
+        errorGraph->SetPointError(
+            point,
+            0.0, 0.0,
+            standardDeviation, standardDeviation
+        );
     }
 
     TCanvas *canvas = new TCanvas(
-        "canvas", "Temperature by day of year", 1000, 600
+        "canvas", "Temperature by day of year", 1200, 700
     );
 
-    graph->SetTitle(
-        "Mean Temperature for Each Day of the Year;"
+    meanGraph->SetTitle(
+        "Mean Daily Temperature Throughout the Year;"
         "Day of Year;"
         "Mean Temperature (#circC)"
     );
 
-    graph->SetMarkerStyle(20);
-    graph->SetMarkerSize(0.5);
-    graph->SetLineWidth(2);
+    // Style the standard deviation band.
+    errorGraph->SetFillColorAlpha(kAzure + 1, 0.15);
+    errorGraph->SetLineColorAlpha(kAzure + 1, 0.15);
 
-    graph->Draw("AP");
-    graph->GetXaxis()->SetLimits(1, 365);
-    graph->GetXaxis()->SetNdivisions(12);
+    // Style the mean temperature line.
+    meanGraph->SetLineColor(kRed + 1);
+    meanGraph->SetLineWidth(3);
+
+    // Set axis properties.
+    errorGraph->GetXaxis()->SetLimits(1, 365);
+    errorGraph->GetXaxis()->SetNdivisions(12);
+    errorGraph->GetXaxis()->SetRangeUser(1, 365);
+
+    // Draw the standard deviation band first.
+    errorGraph->SetTitle(
+        "Mean Daily Temperature Throughout the Year;"
+        "Day of Year;"
+        "Mean Temperature (#circC)"
+    );
+    errorGraph->Draw("A3");
+
+    // Draw the mean temperature clearly on top.
+    meanGraph->Draw("L SAME");
+    errorGraph->GetXaxis()->SetLimits(1, 365);
+
+    canvas->SetGrid(1, 1);
 
     canvas->SaveAs("Analysis3.pdf");
+
 }
